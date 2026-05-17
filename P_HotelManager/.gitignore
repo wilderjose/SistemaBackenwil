@@ -1,0 +1,24 @@
+# Entorno virtual de Python
+venv/
+.venv/
+env/
+
+# Archivos compilados por Python automáticamente
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Base de datos local (¡Muy importante no subirla!)
+db.sqlite3
+
+# Archivos de configuración secreta
+.env
+
+# Archivos estáticos y de medios locales
+staticfiles/
+media/
+
+# Archivos del sistema o del editor
+.DS_Store
+.vscode/
