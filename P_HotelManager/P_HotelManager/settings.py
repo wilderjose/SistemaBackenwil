@@ -1,14 +1,19 @@
 from pathlib import Path
 import dj_database_url
 
+# Ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# CLAVE SECRETA (Mantén esta en secreto en producción más adelante)
 SECRET_KEY = 'django-insecure-j%g%zddjne0x!_wrvvx0+ek(@afm+q@cb&e--8h1ufe9c&v04y'
 
+# DEBUG activo por ahora para ver errores si ocurren
 DEBUG = True
 
+# Permitir que Render conecte con tu Backend
 ALLOWED_HOSTS = ['*']
 
+# Aplicaciones instaladas
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -23,6 +28,7 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
+# Middlewares (CORS debe ir arriba del todo)
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -53,18 +59,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'P_HotelManager.wsgi.application'
+
+# ─── CONFIGURACIÓN DE BASE DE DATOS NEON (CORREGIDA) ──────────────────
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_sT6iewzn9ICk',
-        'HOST': 'ep-steep-mud-aqugh9vv-pooler.c-8.us-east-1.aws.neon.tech',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        }
-    }
+    'default': dj_database_url.config(
+        default='postgresql://neondb_owner:npg_sT6iewzn9ICk@ep-steep-mud-aqugh9vv-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require'
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -95,5 +95,5 @@ REST_FRAMEWORK = {
     ),
 }
 
-# ─── CORS ─────────────────────────────────────────────
+# ─── CORS (CORREGIDO Y LIMPIO) ────────────────────────
 CORS_ALLOW_ALL_ORIGINS = True
