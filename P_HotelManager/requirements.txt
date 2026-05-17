@@ -11,7 +11,7 @@ django-filter==23.2
 djangorestframework==3.17.1
 djangorestframework_simplejwt==5.5.1
 et_xmlfile==2.0.0
-gunicorn==26.0.0
+gunicorn==21.2.0
 idna==3.12
 lxml==6.1.0
 markdown-it-py==4.0.0
