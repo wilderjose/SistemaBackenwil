@@ -1,4 +1,5 @@
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,15 +53,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'P_HotelManager.wsgi.application'
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bd_HotelManager',
-        'USER': 'postgres',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
+        'NAME': 'neondb',
+        'USER': 'neondb_owner',
+        'PASSWORD': 'npg_sT6iewzn9ICk',
+        'HOST': 'ep-steep-mud-aqugh9vv-pooler.c-8.us-east-1.aws.neon.tech',
         'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
     }
 }
 
