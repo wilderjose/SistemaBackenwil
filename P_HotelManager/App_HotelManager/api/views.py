@@ -152,7 +152,7 @@ class HabitacionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 
-   @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'])
     def resumen(self, request):
         user = request.user
 
