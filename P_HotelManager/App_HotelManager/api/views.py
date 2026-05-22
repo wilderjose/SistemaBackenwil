@@ -152,9 +152,14 @@ class HabitacionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 
-    @action(detail=False, methods=['get'])
+   @action(detail=False, methods=['get'])
     def resumen(self, request):
+        user = request.user
+
         habitaciones = Habitacion.objects.filter(activa=True)
+
+        if user.rol != 'admin':
+            habitaciones = habitaciones.filter(usuario=user)
 
         total = habitaciones.count()
         disponibles = habitaciones.filter(estado='disponible').count()
