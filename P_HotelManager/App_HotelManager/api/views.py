@@ -92,7 +92,12 @@ class ClienteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
         queryset = Cliente.objects.all()
+
+        if user.rol != 'admin':
+            queryset = queryset.filter(usuario=user)
+
         buscar = self.request.query_params.get('buscar')
 
         if buscar:
@@ -106,6 +111,11 @@ class ClienteViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
 
 class HabitacionViewSet(viewsets.ModelViewSet):
     queryset = Habitacion.objects.all()
@@ -163,20 +173,21 @@ class HabitacionViewSet(viewsets.ModelViewSet):
 
 
 class AsignacionViewSet(viewsets.ModelViewSet):
-    queryset = Asignacion.objects.select_related(
-        'habitacion',
-        'cliente',
-        'usuario'
-    ).all()
+    queryset = Asignacion.objects.all()
     serializer_class = AsignacionSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
+
         queryset = Asignacion.objects.select_related(
             'habitacion',
             'cliente',
             'usuario'
-        ).all()
+        )
+
+        if user.rol != 'admin':
+            queryset = queryset.filter(usuario=user)
 
         estado = self.request.query_params.get('estado')
         cliente = self.request.query_params.get('cliente')
@@ -211,16 +222,26 @@ class AsignacionViewSet(viewsets.ModelViewSet):
     def activas(self, request):
         asignaciones = self.get_queryset().filter(estado='activa')
         serializer = self.get_serializer(asignaciones, many=True)
-
         return Response(serializer.data)
+    
 
 class PagoViewSet(viewsets.ModelViewSet):
-    queryset = Pago.objects.select_related('asignacion').all()
+    queryset = Pago.objects.all()
     serializer_class = PagoSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Pago.objects.select_related('asignacion').all()
+        user = self.request.user
+
+        queryset = Pago.objects.select_related(
+            'asignacion',
+            'asignacion__usuario',
+            'asignacion__cliente',
+            'asignacion__habitacion',
+        )
+
+        if user.rol != 'admin':
+            queryset = queryset.filter(asignacion__usuario=user)
 
         asignacion = self.request.query_params.get('asignacion')
 
@@ -233,20 +254,31 @@ class PagoViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_resumen(request):
+    user = request.user
+
     habitaciones = Habitacion.objects.filter(activa=True)
 
-    ids_ocupadas = Asignacion.objects.filter(
-        estado='activa'
-    ).values_list('habitacion_id', flat=True)
+    asignaciones = Asignacion.objects.filter(estado='activa')
+
+    pagos = Pago.objects.all()
+
+    clientes = Cliente.objects.all()
+
+    if user.rol != 'admin':
+        asignaciones = asignaciones.filter(usuario=user)
+        pagos = pagos.filter(asignacion__usuario=user)
+        clientes = clientes.filter(asignaciones__usuario=user).distinct()
+
+    ids_ocupadas = asignaciones.values_list('habitacion_id', flat=True)
 
     total_habitaciones = habitaciones.count()
     habitaciones_ocupadas = habitaciones.filter(id__in=ids_ocupadas).count()
     habitaciones_disponibles = total_habitaciones - habitaciones_ocupadas
 
-    total_clientes = Cliente.objects.count()
-    asignaciones_activas = Asignacion.objects.filter(estado='activa').count()
+    total_clientes = clientes.count()
+    asignaciones_activas = asignaciones.count()
 
-    ingresos = Pago.objects.aggregate(
+    ingresos = pagos.aggregate(
         total=Sum('monto')
     )['total'] or 0
 
@@ -254,9 +286,8 @@ def dashboard_resumen(request):
         'habitaciones_total': total_habitaciones,
         'habitaciones_disponibles': habitaciones_disponibles,
         'habitaciones_ocupadas': habitaciones_ocupadas,
-        'habitaciones_limpiando': 0,
+        'habitaciones_limpiando': habitaciones.filter(estado='limpieza').count(),
         'clientes_total': total_clientes,
         'asignaciones_activas': asignaciones_activas,
         'ingresos_totales': ingresos,
     })
-    

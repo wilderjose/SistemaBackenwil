@@ -35,6 +35,13 @@ class Cliente(models.Model):
     telefono = models.CharField(max_length=30)
     nacionalidad = models.CharField(max_length=80, blank=True, null=True)
     creado_en = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(
+    Usuario,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name='clientes_creados'
+)
 
     class Meta:
         ordering = ['nombre', 'apellido']
