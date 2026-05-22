@@ -89,19 +89,21 @@ class HabitacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Habitacion
         fields = [
-        'id',
-        'nombre',
-        'piso',
-        'capacidad',
-        'precio',
-        'tipo_cobro',
-        'moneda',
-        'aire_acondicionado',
-        'estado',
-        'activa',
-        'disponible',
-        'estado_texto',
-    ]
+            'id',
+            'nombre',
+            'piso',
+            'capacidad',
+            'precio',
+            'tipo_cobro',
+            'moneda',
+            'aire_acondicionado',
+            'estado',
+            'activa',
+            'usuario',
+            'disponible',
+            'estado_texto',
+        ]
+        read_only_fields = ['usuario']
 
 
     def get_disponible(self, obj):

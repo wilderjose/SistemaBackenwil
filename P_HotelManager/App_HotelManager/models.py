@@ -76,6 +76,13 @@ class Habitacion(models.Model):
     aire_acondicionado = models.BooleanField(default=False)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='disponible')
     activa = models.BooleanField(default=True)
+    usuario = models.ForeignKey(
+    Usuario,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name='habitaciones_creadas'
+)
 
     class Meta:
         ordering = ['piso', 'nombre']

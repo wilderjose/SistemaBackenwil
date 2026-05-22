@@ -123,7 +123,12 @@ class HabitacionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
+
         queryset = Habitacion.objects.filter(activa=True)
+
+        if user.rol != 'admin':
+            queryset = queryset.filter(usuario=user)
 
         piso = self.request.query_params.get('piso')
         tipo_cobro = self.request.query_params.get('tipo_cobro')
@@ -143,6 +148,9 @@ class HabitacionViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(estado='disponible')
 
         return queryset.order_by('piso', 'nombre')
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
 
     @action(detail=False, methods=['get'])
     def resumen(self, request):
