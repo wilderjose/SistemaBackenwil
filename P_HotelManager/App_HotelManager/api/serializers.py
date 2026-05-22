@@ -58,6 +58,8 @@ class PerfilHotelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
+
 class ClienteSerializer(serializers.ModelSerializer):
     nombre_completo = serializers.SerializerMethodField()
 
@@ -71,8 +73,10 @@ class ClienteSerializer(serializers.ModelSerializer):
             'cedula',
             'telefono',
             'nacionalidad',
+            'usuario',
             'creado_en',
         ]
+        read_only_fields = ['usuario', 'creado_en']
 
     def get_nombre_completo(self, obj):
         return f'{obj.nombre} {obj.apellido}'
