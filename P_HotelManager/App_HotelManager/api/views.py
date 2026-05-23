@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, get_user_model
 from django.db.models import Q, Sum
 from rest_framework.authtoken.models import Token
+from django.db.models.functions import TruncMonth
 from App_HotelManager.models import (
     PerfilHotel,
     Cliente,
@@ -304,3 +305,47 @@ def dashboard_resumen(request):
         'asignaciones_activas': asignaciones_activas,
         'ingresos_totales': ingresos,
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def ganancias_mensuales(request):
+    user = request.user
+
+    asignaciones = Asignacion.objects.filter(
+        estado__in=['activa', 'finalizada']
+    )
+
+    if user.rol != 'admin':
+        asignaciones = asignaciones.filter(usuario=user)
+
+    datos = (
+        asignaciones
+        .annotate(mes=TruncMonth('creado_en'))
+        .values('mes')
+        .annotate(total=Sum('total'))
+        .order_by('mes')
+    )
+
+    MESES = {
+        1: "Enero",
+        2: "Febrero",
+        3: "Marzo",
+        4: "Abril",
+        5: "Mayo",
+        6: "Junio",
+        7: "Julio",
+        8: "Agosto",
+        9: "Septiembre",
+        10: "Octubre",
+        11: "Noviembre",
+        12: "Diciembre",
+    }
+
+    return Response([
+        {
+            'mes': MESES[item['mes'].month] if item['mes'] else '',
+            'total': float(item['total'] or 0)
+        }
+        for item in datos
+    ])
